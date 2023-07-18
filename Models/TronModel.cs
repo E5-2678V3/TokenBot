@@ -524,4 +524,237 @@ namespace UsdtTelegrambot.Models
         [JsonProperty("vote_count")]
         public long VoteCount { get; set; }
     }
+
+
+
+
+    public class ApiResponse
+    {
+        public string code { get; set; }
+        public string msg { get; set; }
+        public Data[] data { get; set; }
+    }
+
+    public class Data
+    {
+        public string page { get; set; }
+        public string limit { get; set; }
+        public string totalPage { get; set; }
+        public string chainFullName { get; set; }
+        public string chainShortName { get; set; }
+        public TransactionList[] transactionLists { get; set; }
+    }
+
+    public class TransactionList
+    {
+        public string txId { get; set; }
+        public string methodId { get; set; }
+        public string blockHash { get; set; }
+        public string height { get; set; }
+        public string transactionTime { get; set; }
+        public string from { get; set; }
+        public string to { get; set; }
+        public bool isFromContract { get; set; }
+        public bool isToContract { get; set; }
+        public string amount { get; set; }
+        public string transactionSymbol { get; set; }
+        public string txFee { get; set; }
+        public string state { get; set; }
+        public string tokenId { get; set; }
+        public string tokenContractAddress { get; set; }
+        public string challengeStatus { get; set; }
+        public string l1OriginHash { get; set; }
+    }
+
+
+    public class ETHresponseDataItem
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string chainFullName { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string chainShortName { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string address { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string contractAddress { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string balance { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string balanceSymbol { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string transactionCount { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string verifying { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string sendAmount { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string receiveAmount { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string tokenAmount { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string totalTokenValue { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string createContractAddress { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string createContractTransactionHash { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string firstTransactionTime { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string lastTransactionTime { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string token { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string bandwidth { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string energy { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string votingRights { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string unclaimedVotingRewards { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string isAaAddress { get; set; }
+    }
+
+    public class ETHresponse
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string code { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string msg { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<ETHresponseDataItem> data { get; set; }
+    }
+
+
+
+    public class TokenListItem
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string token { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string tokenId { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string holdingAmount { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string totalTokenValue { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string change24h { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string priceUsd { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string valueUsd { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string tokenContractAddress { get; set; }
+    }
+
+    public class ETHTRC20ResponseDataItem
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string page { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string limit { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string totalPage { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string chainFullName { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string chainShortName { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<TokenListItem> tokenList { get; set; }
+    }
+
+    public class ETHTRC20Response
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string code { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string msg { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<ETHTRC20ResponseDataItem> data { get; set; }
+    }
+
 }

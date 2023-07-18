@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using UsdtTelegrambot.BgServices.Base;
 using UsdtTelegrambot.Domains.Tables;
 using UsdtTelegrambot.Extensions;
@@ -46,17 +47,12 @@ namespace UsdtTelegrambot.BgServices
             var _bindRepository = provider.GetRequiredService<IBaseRepository<TokenBind>>();
 
             var payMinTime = DateTime.Now.AddSeconds(-60 * 5);
-            List<TokenBind> list = _bindRepository.Where(x => x.Currency == Currency.USDT).ToList();
-
-            List<string> tempList = new List<string>();
-            foreach (TokenBind x in list)
-            {
-                tempList.Add(x.Address);
-            }
+            List<string> tempList = _bindRepository.Where(x => x.Currency == Currency.USDT).ToList(x=>x.Address);
+            tempList = tempList.Distinct().ToList();
             var addressArray = tempList.ToArray();
             if (addressArray.Length == 0)
             {
-                _logger.LogWarning("未配置USDT收款地址！");
+                _logger.LogWarning("未配置USDT监控地址！");
                 return;
             }
             var ContractAddress = _configuration.GetValue("TronConfig:USDTContractAddress", "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t");
@@ -121,12 +117,15 @@ namespace UsdtTelegrambot.BgServices
                                                 Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton.WithUrl("查看交易",viewUrl),
                                             },
                                     });
-
-                                TokenBind bindinfo = await _bindRepository.Where(x => x.Address == address).FirstAsync();
+                                if (amount>  (decimal)0.1) 
+                                {
+                                    List<long> Userlist = await _bindRepository.Where(x => x.Address == address).ToListAsync(x => x.UserId);
+                                    foreach (var user in Userlist)
+                                    {
                                         try
-                                        {
-                                            await _botClient.SendTextMessageAsync(bindinfo.UserId, 
-                                                $@"<b>交易信息{record.OriginalCurrency}</b>
+                                    {
+                                      await _botClient.SendTextMessageAsync(user,
+                                            $@"<b>交易信息{record.OriginalCurrency}</b>
 入账金额：<b>{record.OriginalAmount:#.######} {record.OriginalCurrency}</b>
 哈希：<code>{record.BlockTransactionId}</code>
 时间：<b>{record.ReceiveTime:yyyy-MM-dd HH:mm:ss}</b>
@@ -134,10 +133,12 @@ namespace UsdtTelegrambot.BgServices
 入账地址：<code>{record.ToAddress}</code>
                                             ", Telegram.Bot.Types.Enums.ParseMode.Html, replyMarkup: inlineKeyboard);
                                         }
-                                        catch (Exception e)
-                                        {
-                                            _logger.LogError(e, $"给用户发送通知失败！用户ID：{bindinfo.UserId}");
-                                        }
+                                    catch (Exception e)
+                                    {
+                                        _logger.LogError(e, $"给用户发送通知失败！用户ID：{user}");
+                                    }
+                                    }
+                                }
                             }
                             catch (Exception e)
                             {
