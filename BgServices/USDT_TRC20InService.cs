@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Nethereum.ABI.FunctionEncoding;
+using System.Globalization;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using UsdtTelegrambot.BgServices.Base;
@@ -120,14 +122,16 @@ namespace UsdtTelegrambot.BgServices
                                 if (amount>  (decimal)0.1) 
                                 {
                                     List<long> Userlist = await _bindRepository.Where(x => x.Address == address).ToListAsync(x => x.UserId);
+                                    var usdtbalance = await GetUSDTBalance(address);
                                     foreach (var user in Userlist)
                                     {
                                         try
                                     {
                                       await _botClient.SendTextMessageAsync(user,
-                                            $@"<b>交易信息{record.OriginalCurrency}</b>
+                                            $@"您有一笔<b>入账</b>交易
 入账金额：<b>{record.OriginalAmount:#.######} {record.OriginalCurrency}</b>
 哈希：<code>{record.BlockTransactionId}</code>
+当前余额：<b>{usdtbalance}</b>
 时间：<b>{record.ReceiveTime:yyyy-MM-dd HH:mm:ss}</b>
 来源地址：<code>{record.FromAddress}</code>
 入账地址：<code>{record.ToAddress}</code>
@@ -153,5 +157,49 @@ namespace UsdtTelegrambot.BgServices
                 }
             }
         }
+
+
+         async Task<decimal> GetUSDTBalance(string Address)
+        {
+            string text = Address.DecodeBase58();
+            FunctionCallEncoder functionCallEncoder = new FunctionCallEncoder();
+            Nethereum.ABI.Model.Parameter[] parameters = new Nethereum.ABI.Model.Parameter[1]
+            {
+        new Nethereum.ABI.Model.Parameter("address", "who")
+            };
+            object[] values = new string[1] { "0x" + text.Substring(2, text.Length - 2) };
+            string parameter = Convert.ToHexString(functionCallEncoder.EncodeParameters(parameters, values));
+            IFlurlRequest flurlRequest = "https://api.trongrid.io/wallet/triggerconstantcontract".WithTimeout(5);
+            string[] array = new string[] { "TRON-PRO-API-KEY" };
+            if (array.Length != 0)
+            {
+                string value = array.OrderBy((string x) => Guid.NewGuid()).First();
+                flurlRequest = flurlRequest.WithHeader("TRON-PRO-API-KEY", _configuration.GetValue("TronNet:ApiKey", ""));
+            }
+
+            BalanceOfModel balanceOfModel = await flurlRequest.PostJsonAsync(new
+            {
+                owner_address = Address,
+                contract_address = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+                function_selector = "balanceOf(address)",
+                parameter = parameter,
+                visible = true
+            }).ReceiveJson<BalanceOfModel>();
+
+            if (balanceOfModel.Result.Result)
+            {
+                string text2 = balanceOfModel.ConstantResult.FirstOrDefault();
+                if (!string.IsNullOrEmpty(text2))
+                {
+                    text2 = text2.TrimStart('0');
+                    if (long.TryParse(text2, NumberStyles.HexNumber, null, out var result))
+                    {
+                        return (decimal)result / 1000000m;
+                    }
+                }
+            }
+            return default(decimal);
+        }
+
     }
 }
